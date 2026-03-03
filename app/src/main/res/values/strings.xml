@@ -1,0 +1,23 @@
+<resources>
+    <string name="app_name">Labaratorni9_Belyaev_Selivanov</string>
+
+    <string name="game1_title">Counter-Strike: Global Offensive</string>
+    <string name="game2_title">Euro Truck Simulator 2</string>
+    <string name="game3_title">Arma 3</string>
+    <string name="game4_title">PUBG: Battlegrounds</string>
+
+    <string name="game1_genre">Шутер</string>
+    <string name="game2_genre">Симулятор</string>
+    <string name="game3_genre">Тактический шутер</string>
+    <string name="game4_genre">Battle Royale</string>
+
+    <string name="game1_year">2012</string>
+    <string name="game2_year">2012</string>
+    <string name="game3_year">2013</string>
+    <string name="game4_year">2017</string>
+
+    <string name="game1_description">Культовый командный шутер от первого лица. Игроки делятся на террористов и спецназ. Знаменит своей соревновательной сценой.</string>
+    <string name="game2_description">Реалистичный симулятор дальнобойщика. Путешествуйте по Европе, перевозите грузы и развивайте свою логистическую компанию.</string>
+    <string name="game3_description">Масштабный военный симулятор в открытом мире. Огромный реализм, поддержка модов и разнообразные сценарии боевых действий.</string>
+    <string name="game4_description">Королевская битва, где 100 игроков сражаются до последнего выжившего. Тактика, выживание и азарт в одном флаконе.</string>
+</resources>
