@@ -9,7 +9,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -26,7 +26,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             Labaratorni9_Belyaev_SelivanovTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    StaticGameScreen(
+                    GameCatalogApp(
                         modifier = Modifier.padding(innerPadding)
                     )
                 }
@@ -77,9 +77,12 @@ fun loadGameList(): List<Game> {
 }
 
 @Composable
-fun StaticGameScreen(modifier: Modifier = Modifier) {
-    val games = loadGameList()
-    val firstGame = games[0]
+fun GameCatalogApp(modifier: Modifier = Modifier) {
+    val games = remember { loadGameList() }
+
+    var currentIndex by remember { mutableIntStateOf(0) }
+
+    var showDescription by remember { mutableStateOf(false) }
 
     Column(
         modifier = modifier
@@ -94,91 +97,90 @@ fun StaticGameScreen(modifier: Modifier = Modifier) {
             modifier = Modifier.padding(bottom = 16.dp)
         )
 
-        GameImage(game = firstGame)
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        ) {
+            Image(
+                painter = painterResource(games[currentIndex].imageResourceId),
+                contentDescription = stringResource(games[currentIndex].titleResourceId),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(250.dp),
+                contentScale = ContentScale.Crop
+            )
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        GameTitle(game = firstGame)
+        Text(
+            text = stringResource(games[currentIndex].titleResourceId),
+            style = MaterialTheme.typography.headlineSmall,
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Surface(
+                color = MaterialTheme.colorScheme.primaryContainer,
+                shape = MaterialTheme.shapes.small
+            ) {
+                Text(
+                    text = stringResource(games[currentIndex].genreResourceId),
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                )
+            }
+
+            Surface(
+                color = MaterialTheme.colorScheme.secondaryContainer,
+                shape = MaterialTheme.shapes.small
+            ) {
+                Text(
+                    text = stringResource(games[currentIndex].yearResourceId),
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                )
+            }
+        }
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        GameChips(game = firstGame)
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        GameDescription(game = firstGame)
+        if (showDescription) {
+            Text(
+                text = stringResource(games[currentIndex].descriptionResourceId),
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        StaticControlPanel()
-    }
-}
-
-@Composable
-fun GameImage(game: Game) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-    ) {
-        Image(
-            painter = painterResource(game.imageResourceId),
-            contentDescription = stringResource(game.titleResourceId),
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(250.dp),
-            contentScale = ContentScale.Crop
+        ControlPanel(
+            currentIndex = currentIndex,
+            totalItems = games.size,
+            onPreviousClick = {
+                if (currentIndex > 0) currentIndex--
+            },
+            onNextClick = {
+                if (currentIndex < games.size - 1) currentIndex++
+            },
+            showDescription = showDescription,
+            onToggleDescription = { showDescription = !showDescription }
         )
     }
 }
 
 @Composable
-fun GameTitle(game: Game) {
-    Text(
-        text = stringResource(game.titleResourceId),
-        style = MaterialTheme.typography.headlineSmall,
-        modifier = Modifier.fillMaxWidth()
-    )
-}
-
-@Composable
-fun GameChips(game: Game) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        Surface(
-            color = MaterialTheme.colorScheme.primaryContainer,
-            shape = MaterialTheme.shapes.small
-        ) {
-            Text(
-                text = stringResource(game.genreResourceId),
-                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-            )
-        }
-
-        Surface(
-            color = MaterialTheme.colorScheme.secondaryContainer,
-            shape = MaterialTheme.shapes.small
-        ) {
-            Text(
-                text = stringResource(game.yearResourceId),
-                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-            )
-        }
-    }
-}
-
-@Composable
-fun GameDescription(game: Game) {
-    Text(
-        text = stringResource(game.descriptionResourceId),
-        style = MaterialTheme.typography.bodyMedium,
-        modifier = Modifier.fillMaxWidth()
-    )
-}
-
-@Composable
-fun StaticControlPanel() {
+fun ControlPanel(
+    currentIndex: Int,
+    totalItems: Int,
+    onPreviousClick: () -> Unit,
+    onNextClick: () -> Unit,
+    showDescription: Boolean,
+    onToggleDescription: () -> Unit
+) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxWidth()
@@ -188,16 +190,17 @@ fun StaticControlPanel() {
             modifier = Modifier.fillMaxWidth()
         ) {
             Button(
-                onClick = { /* Пока ничего */ },
+                onClick = onPreviousClick,
+                enabled = currentIndex > 0,
                 modifier = Modifier.weight(1f)
             ) {
-                Text("◀ Назад")
+                Text("Назад")
             }
 
             Spacer(modifier = Modifier.width(16.dp))
 
             Text(
-                text = "1/4",
+                text = "${currentIndex + 1}/${totalItems}",
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.align(Alignment.CenterVertically)
             )
@@ -205,27 +208,29 @@ fun StaticControlPanel() {
             Spacer(modifier = Modifier.width(16.dp))
 
             Button(
-                onClick = { /* Пока ничего */ },
+                onClick = onNextClick,
+                enabled = currentIndex < totalItems - 1,
                 modifier = Modifier.weight(1f)
             ) {
-                Text("Вперед ▶")
+                Text("Вперед")
             }
         }
 
         Spacer(modifier = Modifier.height(8.dp))
 
         Button(
-            onClick = { /* Пока ничего */ }
+            onClick = onToggleDescription,
+            modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Показать описание")
+            Text(if (showDescription) "Скрыть описание" else "Показать описание")
         }
     }
 }
 
 @Preview(showBackground = true)
 @Composable
-fun StaticGameScreenPreview() {
+fun GameCatalogAppPreview() {
     Labaratorni9_Belyaev_SelivanovTheme {
-        StaticGameScreen()
+        GameCatalogApp()
     }
 }
